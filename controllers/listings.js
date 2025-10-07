@@ -2,6 +2,7 @@ const Listing = require("../models/listing");
 const mbxGeocoding = require('@mapbox/mapbox-sdk/services/geocoding');
 const mapToken = process.env.MAP_TOKEN;
 const geocodingClient = mbxGeocoding({ accessToken: mapToken  });
+const mongoose = require("mongoose");
 
 
 
@@ -20,6 +21,15 @@ module.exports.renderNewForm = (req, res)=>{
  //For Show Route
 module.exports.showListing = async (req, res) =>{
     let {id} = req.params;
+
+ if (!mongoose.Types.ObjectId.isValid(id)) {
+    req.flash("error", "Invalid listing ID.");
+    return res.redirect("/listings");
+  }
+
+
+
+try{
     const listing = await Listing.findById(id)
     .populate({
       path: "reviews",
@@ -32,9 +42,14 @@ module.exports.showListing = async (req, res) =>{
       req.flash("error", "Listing you requested for does not exist!");
      return res.redirect("/listings");
     }
-    console.log(listing);
-    res.render("listings/show.ejs", {listing, });
+    // console.log(listing);
+    res.render("listings/show.ejs", {listing });
+ } catch (err){
+  console.error(" Error fetching listing:", err.message);
+    req.flash("error", "Something went wrong while fetching the listing.");
+    res.redirect("/listings");
  }
+};
 
  //For Create Route
  module.exports.createListing = async (req, res, next) =>{

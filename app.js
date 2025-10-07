@@ -11,6 +11,7 @@ const methodOverride = require("method-override");
 const ejsMate = require("ejs-mate");
 const { createCipheriv } = require("crypto");
 const ExpressError = require("./utils/ExpressError.js");
+const Listing = require("./models/listing.js");
 
 const session = require("express-session");
  const MongoStore = require('connect-mongo');
@@ -73,11 +74,25 @@ const sessionOptions={
 //     res.send("Hi I am root");
 // });
 
+// app.get("/", async(req, res) =>{
+//     try{
+//      const allListing  = await Listing.find({});
+//      res.render("listings/index", {allListing});
+
+//     } catch (err){
+//         console.log(err);
+//         res.status(500).send("Server Error");
+//     }
+// });
+
+app.get("/", (req, res) => {
+    res.redirect("/listings"); // or res.render("home")
+});
 
 
 
 
-app.use(session(sessionOptions));
+app.use(session(sessionOptions));  
 app.use(flash());
 
 app.use(passport.initialize());
@@ -108,9 +123,10 @@ app.use((req, res, next) =>{
 //      res.send(registeredUser);
 // })
 
- 
+
+
 app.use("/listings", listingRouter);
-app.use("/listings/:id/reviews", reviewRouter)
+ app.use("/listings/:id/reviews", reviewRouter);
 app.use("/", userRouter);
 
 
